@@ -13,6 +13,7 @@ from flask import (
     redirect,
     render_template,
     request,
+    send_from_directory,
     session,
     url_for,
     jsonify,
@@ -61,6 +62,16 @@ def manager_required(f):
             return redirect(url_for('employee_dashboard'))
         return f(*args, **kwargs)
     return decorated
+
+
+# ---------------------------------------------------------------------------
+# PWA — service worker must be served from root scope
+# ---------------------------------------------------------------------------
+
+@app.route('/sw.js')
+def service_worker():
+    return send_from_directory(app.static_folder, 'sw.js',
+                               mimetype='application/javascript')
 
 
 # ---------------------------------------------------------------------------
