@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% block title %}Apply for Leave{% endblock %}
+{% block page_title %}Apply for Leave{% endblock %}
+
+{% block content %}
+<div class="page-header mb-4">
+  <h4 class="fw-bold mb-0">New Leave Request</h4>
+  <p class="text-muted mb-0">Fill in the details below and submit for approval</p>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8 col-xl-6">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+
+        <form method="POST" action="{{ url_for('employee_apply') }}" id="applyLeaveForm" novalidate>
+
+          <!-- Leave Type -->
+          <div class="mb-4">
+            <label for="leave_type_id" class="form-label fw-semibold">
+              Leave Type <span class="text-danger">*</span>
+            </label>
+            <select class="form-select" id="leave_type_id" name="leave_type_id" required>
+              <option value="">— Select a leave type —</option>
+              {% for lt in leave_types %}
+              <option value="{{ lt.id }}">{{ lt.name }}</option>
+              {% endfor %}
+            </select>
+            <div class="invalid-feedback">Please select a leave type.</div>
+
+            <!-- Balance indicator -->
+            <div id="balanceIndicator" class="mt-2 d-none">
+              <div class="d-flex align-items-center gap-2">
+                <div class="spinner-border spinner-border-sm text-primary d-none" id="balanceSpinner" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <span id="balanceText" class="small"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Date Range -->
+          <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6">
+              <label for="date_from" class="form-label fw-semibold">
+                Start Date <span class="text-danger">*</span>
+              </label>
+              <input type="date" class="form-control" id="date_from" name="date_from"
+                     required min="{{ now().strftime('%Y-%m-%d') if now else '' }}" />
+              <div class="invalid-feedback">Please select a start date.</div>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label for="date_to" class="form-label fw-semibold">
+                End Date <span class="text-danger">*</span>
+              </label>
+              <input type="date" class="form-control" id="date_to" name="date_to"
+                     required min="{{ now().strftime('%Y-%m-%d') if now else '' }}" />
+              <div class="invalid-feedback" id="dateToFeedback">Please select an end date.</div>
+            </div>
+          </div>
+
+          <!-- Duration preview -->
+          <div id="durationPreview" class="alert alert-info d-none mb-4">
+            <i class="bi bi-calendar-range me-2"></i>
+            <span id="durationText"></span>
+          </div>
+
+          <!-- Reason -->
+          <div class="mb-4">
+            <label for="reason" class="form-label fw-semibold">Reason / Notes</label>
+            <textarea class="form-control" id="reason" name="reason" rows="4"
+                      placeholder="Optional: describe the reason for your leave request…"
+                      maxlength="500"></textarea>
+            <div class="form-text text-end">
+              <span id="reasonCount">0</span>/500
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="d-flex gap-3">
+            <button type="submit" class="btn btn-primary flex-grow-1" id="submitBtn">
+              <i class="bi bi-send me-2"></i>Submit Request
+            </button>
+            <a href="{{ url_for('employee_dashboard') }}" class="btn btn-outline-secondary">
+              Cancel
+            </a>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+
+    <!-- Help card -->
+    <div class="card mt-3 border-0 bg-light">
+      <div class="card-body p-3">
+        <h6 class="fw-semibold mb-2">
+          <i class="bi bi-info-circle text-primary me-1"></i>How it works
+        </h6>
+        <ol class="small text-muted mb-0 ps-3">
+          <li>Submit your request — it goes straight to your manager.</li>
+          <li>Your manager reviews and approves or declines.</li>
+          <li>You'll see the updated status on your history page.</li>
+        </ol>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  'use strict';
+
+  const leaveTypeSelect = document.getElementById('leave_type_id');
+  const dateFromInput   = document.getElementById('date_from');
+  const dateToInput     = document.getElementById('date_to');
+  const balanceDiv      = document.getElementById('balanceIndicator');
+  const balanceSpinner  = document.getElementById('balanceSpinner');
+  const balanceText     = document.getElementById('balanceText');
+  const durationPreview = document.getElementById('durationPreview');
+  const durationText    = document.getElementById('durationText');
+  const reasonTextarea  = document.getElementById('reason');
+  const reasonCount     = document.getElementById('reasonCount');
+  const form            = document.getElementById('applyLeaveForm');
+  const dateToFeedback  = document.getElementById('dateToFeedback');
+
+  // ---- Set today as min date ----
+  const today = new Date().toISOString().split('T')[0];
+  dateFromInput.min = today;
+  dateToInput.min   = today;
+
+  // ---- Balance fetch ----
+  let balanceFetchTimer = null;
+
+  function fetchBalance(typeId) {
+    if (!typeId) {
+      balanceDiv.classList.add('d-none');
+      return;
+    }
+    balanceDiv.classList.remove('d-none');
+    balanceSpinner.classList.remove('d-none');
+    balanceText.textContent = 'Loading balance…';
+
+    clearTimeout(balanceFetchTimer);
+    balanceFetchTimer = setTimeout(function () {
+      fetch('/api/leave-balance?leave_type_id=' + encodeURIComponent(typeId))
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          balanceSpinner.classList.add('d-none');
+          if (data.error) {
+            balanceText.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-circle me-1"></i>' + data.error + '</span>';
+          } else {
+            var days = parseFloat(data.balance);
+            var cls  = days > 5 ? 'text-success' : days > 0 ? 'text-warning' : 'text-danger';
+            balanceText.innerHTML =
+              '<span class="' + cls + '"><i class="bi bi-calendar2-check me-1"></i>' +
+              'Available balance: <strong>' + days.toFixed(1) + ' day' + (days !== 1 ? 's' : '') + '</strong></span>';
+          }
+        })
+        .catch(function () {
+          balanceSpinner.classList.add('d-none');
+          balanceText.innerHTML = '<span class="text-muted">Could not load balance.</span>';
+        });
+    }, 300);
+  }
+
+  leaveTypeSelect.addEventListener('change', function () {
+    fetchBalance(this.value);
+  });
+
+  // ---- Date logic ----
+  function updateDuration() {
+    var from = dateFromInput.value;
+    var to   = dateToInput.value;
+
+    if (!from || !to) {
+      durationPreview.classList.add('d-none');
+      return;
+    }
+
+    var d1 = new Date(from);
+    var d2 = new Date(to);
+
+    if (d2 < d1) {
+      durationPreview.classList.add('d-none');
+      dateToInput.setCustomValidity('End date must be on or after start date.');
+      dateToFeedback.textContent = 'End date must be on or after start date.';
+      return;
+    }
+
+    dateToInput.setCustomValidity('');
+    dateToFeedback.textContent = 'Please select an end date.';
+
+    // Approximate working days (Mon-Fri)
+    var days = 0;
+    var cur  = new Date(d1);
+    while (cur <= d2) {
+      var wd = cur.getDay();
+      if (wd !== 0 && wd !== 6) { days++; }
+      cur.setDate(cur.getDate() + 1);
+    }
+
+    durationPreview.classList.remove('d-none');
+    durationText.textContent =
+      'Approximately ' + days + ' working day' + (days !== 1 ? 's' : '') +
+      ' (' + from + ' to ' + to + ')';
+  }
+
+  dateFromInput.addEventListener('change', function () {
+    if (dateToInput.value && dateToInput.value < this.value) {
+      dateToInput.value = this.value;
+    }
+    dateToInput.min = this.value;
+    updateDuration();
+  });
+
+  dateToInput.addEventListener('change', updateDuration);
+
+  // ---- Reason character counter ----
+  reasonTextarea.addEventListener('input', function () {
+    reasonCount.textContent = this.value.length;
+  });
+
+  // ---- Form validation ----
+  form.addEventListener('submit', function (e) {
+    if (!form.checkValidity()) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    form.classList.add('was-validated');
+  });
+
+})();
+</script>
+{% endblock %}

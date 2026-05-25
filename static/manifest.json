@@ -1,0 +1,38 @@
+{
+  "name": "Leave Portal",
+  "short_name": "LeavePortal",
+  "description": "Apply for leave and manage team approvals — integrated with Odoo",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e293b",
+  "theme_color": "#0ea5e9",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Apply for Leave",
+      "short_name": "Apply",
+      "url": "/employee/apply",
+      "icons": [{ "src": "/static/icons/icon-192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Requests",
+      "short_name": "History",
+      "url": "/employee/history",
+      "icons": [{ "src": "/static/icons/icon-192.svg", "sizes": "192x192" }]
+    }
+  ]
+}

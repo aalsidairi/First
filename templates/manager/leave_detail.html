@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% block title %}Leave Request Detail{% endblock %}
+{% block page_title %}Review Leave Request{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{{ url_for('manager_dashboard') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i>Back to Team Approvals
+  </a>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8 col-xl-7">
+
+    <!-- Request Details Card -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="mb-0 fw-semibold">Leave Request #{{ leave.id }}</h5>
+        {% set state = leave.state %}
+        <span class="badge fs-6
+          {% if state == 'validate' %}bg-success
+          {% elif state == 'refuse' %}bg-danger
+          {% elif state == 'validate1' %}bg-info text-dark
+          {% elif state == 'confirm' %}bg-warning text-dark
+          {% else %}bg-secondary
+          {% endif %}">
+          {% if state == 'validate' %}<i class="bi bi-check-circle me-1"></i>
+          {% elif state == 'refuse' %}<i class="bi bi-x-circle me-1"></i>
+          {% elif state in ('confirm', 'validate1') %}<i class="bi bi-hourglass-split me-1"></i>
+          {% else %}<i class="bi bi-pencil me-1"></i>
+          {% endif %}
+          {{ leave.state_label }}
+        </span>
+      </div>
+      <div class="card-body p-4">
+
+        <!-- Employee info -->
+        <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded">
+          <div class="employee-avatar-lg">
+            {{ (leave.employee_id.name if leave.employee_id is mapping else leave.employee_id or 'E')[0].upper() }}
+          </div>
+          <div>
+            <div class="fw-semibold fs-5">
+              {{ leave.employee_id.name if leave.employee_id is mapping else leave.employee_id }}
+            </div>
+            <div class="text-muted small">Leave Applicant</div>
+          </div>
+        </div>
+
+        <!-- Details grid -->
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="detail-item">
+              <label class="detail-label">Leave Type</label>
+              <div class="detail-value">
+                {{ leave.holiday_status_id.name if leave.holiday_status_id is mapping else leave.holiday_status_id }}
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="detail-item">
+              <label class="detail-label">Duration</label>
+              <div class="detail-value">
+                {{ leave.number_of_days | int if leave.number_of_days else 0 }}
+                day{{ 's' if (leave.number_of_days or 0) | int != 1 else '' }}
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="detail-item">
+              <label class="detail-label">Start Date</label>
+              <div class="detail-value">
+                {{ leave.date_from[:10] if leave.date_from else '—' }}
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="detail-item">
+              <label class="detail-label">End Date</label>
+              <div class="detail-value">
+                {{ leave.date_to[:10] if leave.date_to else '—' }}
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="detail-item">
+              <label class="detail-label">Reason / Notes</label>
+              <div class="detail-value text-muted">
+                {{ leave.name or 'No reason provided.' }}
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="detail-item">
+              <label class="detail-label">Submitted On</label>
+              <div class="detail-value text-muted small">
+                {{ leave.create_date[:16].replace('T', ' ') if leave.create_date else '—' }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Action Buttons — only shown when leave can be acted upon -->
+    {% if leave.state in ('confirm', 'validate1') %}
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h6 class="mb-0 fw-semibold">
+          <i class="bi bi-check2-square me-1"></i>Decision
+        </h6>
+      </div>
+      <div class="card-body p-4">
+
+        <div class="d-flex flex-column flex-sm-row gap-3 mb-4">
+          <!-- Approve -->
+          <form method="POST"
+                action="{{ url_for('manager_approve_leave', leave_id=leave.id) }}"
+                class="flex-grow-1"
+                id="approveForm">
+            <button type="submit" class="btn btn-success w-100" id="approveBtn">
+              <i class="bi bi-check-circle me-2"></i>Approve Request
+            </button>
+          </form>
+
+          <!-- Refuse trigger -->
+          <button type="button" class="btn btn-danger flex-grow-1" id="refuseToggleBtn">
+            <i class="bi bi-x-circle me-2"></i>Refuse Request
+          </button>
+        </div>
+
+        <!-- Refuse form — hidden by default, shown by JS -->
+        <div id="refuseSection" class="d-none">
+          <hr />
+          <form method="POST"
+                action="{{ url_for('manager_refuse_leave', leave_id=leave.id) }}"
+                id="refuseForm">
+            <div class="mb-3">
+              <label for="refuseReason" class="form-label fw-semibold">
+                Reason for Refusal
+                <span class="text-muted fw-normal small">(optional but recommended)</span>
+              </label>
+              <textarea class="form-control" id="refuseReason" name="reason" rows="3"
+                        placeholder="Explain why this leave is being refused…"
+                        maxlength="500"></textarea>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-danger" id="confirmRefuseBtn">
+                <i class="bi bi-x-circle me-1"></i>Confirm Refusal
+              </button>
+              <button type="button" class="btn btn-outline-secondary" id="cancelRefuseBtn">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+
+    {% elif leave.state == 'validate' %}
+    <div class="alert alert-success d-flex align-items-center gap-2">
+      <i class="bi bi-check-circle-fill flex-shrink-0 fs-5"></i>
+      <span>This leave request has already been <strong>approved</strong>.</span>
+    </div>
+
+    {% elif leave.state == 'refuse' %}
+    <div class="alert alert-danger d-flex align-items-center gap-2">
+      <i class="bi bi-x-circle-fill flex-shrink-0 fs-5"></i>
+      <span>This leave request has been <strong>refused</strong>.</span>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  var refuseToggleBtn = document.getElementById('refuseToggleBtn');
+  var refuseSection   = document.getElementById('refuseSection');
+  var cancelRefuseBtn = document.getElementById('cancelRefuseBtn');
+  var approveForm     = document.getElementById('approveForm');
+  var refuseForm      = document.getElementById('refuseForm');
+
+  if (!refuseToggleBtn) return;
+
+  refuseToggleBtn.addEventListener('click', function () {
+    refuseSection.classList.remove('d-none');
+    refuseToggleBtn.disabled = true;
+    document.getElementById('refuseReason').focus();
+  });
+
+  cancelRefuseBtn.addEventListener('click', function () {
+    refuseSection.classList.add('d-none');
+    refuseToggleBtn.disabled = false;
+    document.getElementById('refuseReason').value = '';
+  });
+
+  // Disable the other button when one form is submitted
+  approveForm.addEventListener('submit', function () {
+    document.getElementById('approveBtn').disabled = true;
+    refuseToggleBtn.disabled = true;
+  });
+
+  refuseForm.addEventListener('submit', function () {
+    document.getElementById('confirmRefuseBtn').disabled = true;
+    cancelRefuseBtn.disabled = true;
+  });
+})();
+</script>
+{% endblock %}
