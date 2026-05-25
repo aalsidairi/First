@@ -71,6 +71,53 @@ sudo ./vpn_server_setup.sh status             # Show WireGuard status
 
 ---
 
+## iPhone / iOS Setup
+
+WireGuard has an official free iOS app. No jailbreak required.
+
+### Step 1 — Add a client profile on your server
+
+```bash
+sudo ./vpn_server_setup.sh add-client myiphone
+```
+
+### Step 2 — Transfer the config to your iPhone
+
+**Option A — QR Code (easiest, no cable needed)**
+
+```bash
+sudo ./vpn_server_setup.sh qr myiphone
+```
+
+On your iPhone:
+1. Open the **App Store** → search **WireGuard** → install it (it's free, by WireGuard Development Team)
+2. Tap **+** → **Create from QR Code**
+3. Point the camera at the QR code on your screen
+4. Name the tunnel and tap **Allow** when asked for VPN permissions
+
+**Option B — File transfer via Mac + AirDrop**
+
+```bash
+# On your Mac, copy the conf file from the server:
+scp root@<SERVER_IP>:/etc/wireguard/clients/myiphone.conf ~/Desktop/myiphone.conf
+```
+
+Then AirDrop `myiphone.conf` to your iPhone → open it → WireGuard imports it automatically.
+
+**Option C — Show all options**
+
+```bash
+sudo ./vpn_server_setup.sh ios myiphone
+```
+
+### Step 3 — Connect on iPhone
+
+In the WireGuard app, tap the toggle next to your tunnel. A VPN icon appears in the status bar when connected.
+
+> The `.conf` file format is identical for Linux, macOS, Windows, Android, and iOS — the same profile works everywhere.
+
+---
+
 ## How It Works
 
 ```

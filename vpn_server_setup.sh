@@ -206,11 +206,70 @@ EOF
     echo "  scp root@$PUBLIC_IP:$CLIENT_DIR/$CLIENT_NAME.conf /etc/wireguard/$CLIENT_NAME.conf"
 }
 
+show_qr() {
+    local CLIENT_NAME="${1:-}"
+    [[ -n "$CLIENT_NAME" ]] || { warn "Provide a client name."; print_usage; exit 1; }
+    local CONF="$CLIENT_DIR/$CLIENT_NAME.conf"
+    [[ -f "$CONF" ]] || error "Client config not found: $CONF"
+
+    if ! command -v qrencode &>/dev/null; then
+        log "Installing qrencode..."
+        case "${OS_ID:-}" in
+            ubuntu|debian) apt-get install -y -qq qrencode ;;
+            centos|rhel|rocky|almalinux) dnf install -y qrencode 2>/dev/null || yum install -y qrencode ;;
+            fedora) dnf install -y qrencode ;;
+            arch|manjaro) pacman -Sy --noconfirm qrencode ;;
+            *) error "Install 'qrencode' manually then re-run." ;;
+        esac
+    fi
+
+    echo ""
+    info "Scan with the WireGuard iOS/Android app (Add Tunnel → Create from QR Code):"
+    echo ""
+    qrencode -t ansiutf8 < "$CONF"
+    echo ""
+    log "Client: $CLIENT_NAME  |  Config: $CONF"
+}
+
+export_ios() {
+    local CLIENT_NAME="${1:-}"
+    [[ -n "$CLIENT_NAME" ]] || { warn "Provide a client name."; print_usage; exit 1; }
+    local CONF="$CLIENT_DIR/$CLIENT_NAME.conf"
+    [[ -f "$CONF" ]] || error "Client config not found: $CONF"
+
+    local OUT="/tmp/${CLIENT_NAME}.conf"
+    cp "$CONF" "$OUT"
+    chmod 644 "$OUT"
+
+    echo ""
+    log "iOS transfer options for '$CLIENT_NAME':"
+    echo ""
+    echo "  1. QR Code (easiest):"
+    echo "     sudo $0 qr $CLIENT_NAME"
+    echo ""
+    echo "  2. Email the config file to yourself:"
+    echo "     cat $OUT   # copy contents into an email"
+    echo ""
+    echo "  3. SCP to your Mac, then AirDrop to iPhone:"
+    PUBLIC_IP=$(curl -s --max-time 10 https://api.ipify.org 2>/dev/null || echo "<SERVER_IP>")
+    echo "     scp root@$PUBLIC_IP:$OUT ~/Desktop/${CLIENT_NAME}.conf"
+    echo "     # Then AirDrop or open in Files → WireGuard app"
+    echo ""
+    echo "  4. Host temporarily over HTTPS (remove after use):"
+    echo "     python3 -m http.server 8080 --directory /tmp &"
+    echo "     # Open http://<SERVER_IP>:8080/${CLIENT_NAME}.conf on iPhone"
+    echo "     # Then kill the server immediately after"
+    echo ""
+    info "On iPhone: WireGuard app → + → Create from file or archive"
+}
+
 print_usage() {
     echo ""
     echo "Usage:"
     echo "  sudo $0                        # Install & configure VPN server"
     echo "  sudo $0 add-client <name>      # Add a new VPN client"
+    echo "  sudo $0 qr <name>              # Show QR code to scan with iPhone"
+    echo "  sudo $0 ios <name>             # Show all iPhone transfer options"
     echo "  sudo $0 list-clients           # List all clients"
     echo "  sudo $0 status                 # Show WireGuard status"
     echo ""
@@ -256,6 +315,16 @@ main() {
         list-clients)
             require_root
             list_clients
+            ;;
+        qr)
+            require_root
+            detect_os
+            show_qr "${2:-}"
+            ;;
+        ios)
+            require_root
+            show_qr "${2:-}" 2>/dev/null || true
+            export_ios "${2:-}"
             ;;
         status)
             require_root
