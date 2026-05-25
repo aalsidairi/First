@@ -1,0 +1,465 @@
+/* =========================================================
+   Leave Management Portal — Custom Styles
+   ========================================================= */
+
+:root {
+  --sidebar-width: 260px;
+  --sidebar-collapsed: 64px;
+  --sidebar-bg: #1a1f2e;
+  --sidebar-text: #a8b4c8;
+  --sidebar-active: #ffffff;
+  --sidebar-hover-bg: rgba(255, 255, 255, 0.07);
+  --sidebar-active-bg: rgba(99, 102, 241, 0.25);
+  --accent: #6366f1;
+  --accent-hover: #4f52d1;
+  --topbar-h: 56px;
+  --radius: 0.75rem;
+}
+
+/* ---- Reset / Base ---- */
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+/* =========================================================
+   Layout
+   ========================================================= */
+#wrapper {
+  min-height: 100vh;
+}
+
+/* ---- Sidebar ---- */
+#sidebar {
+  width: var(--sidebar-width);
+  min-height: 100vh;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  flex-shrink: 0;
+  transition: width 0.25s ease;
+  overflow: hidden;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.sidebar-logo {
+  width: 38px;
+  height: 38px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.sidebar-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+
+.sidebar-nav {
+  list-style: none;
+  padding: 1rem 0.75rem;
+  margin: 0;
+  overflow-y: auto;
+}
+
+.sidebar-section {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(168, 180, 200, 0.5);
+  padding: 0.5rem 0.5rem 0.25rem;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  color: var(--sidebar-text);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: background 0.15s, color 0.15s;
+  margin-bottom: 2px;
+}
+
+.sidebar-link i {
+  font-size: 1rem;
+  width: 1.2rem;
+  flex-shrink: 0;
+}
+
+.sidebar-link:hover {
+  background: var(--sidebar-hover-bg);
+  color: var(--sidebar-active);
+}
+
+.sidebar-link.active {
+  background: var(--sidebar-active-bg);
+  color: var(--sidebar-active);
+  font-weight: 600;
+}
+
+/* Footer */
+.sidebar-footer {
+  padding: 0.75rem;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.5rem 0.75rem;
+}
+
+.user-avatar {
+  width: 34px;
+  height: 34px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.user-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-role {
+  font-size: 0.72rem;
+  color: var(--sidebar-text);
+}
+
+.logout-link {
+  color: #f87171 !important;
+}
+
+.logout-link:hover {
+  background: rgba(248, 113, 113, 0.1) !important;
+}
+
+/* ---- Page content ---- */
+#page-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  height: var(--topbar-h);
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.topbar h5 {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.content-area {
+  padding: 1.75rem;
+  flex: 1;
+}
+
+/* =========================================================
+   Login Page
+   ========================================================= */
+.login-page {
+  background: linear-gradient(135deg, #1a1f2e 0%, #2d3452 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-wrapper {
+  width: 100%;
+  max-width: 440px;
+  padding: 1rem;
+}
+
+.login-card {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 2.5rem 2rem;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-icon {
+  width: 64px;
+  height: 64px;
+  background: var(--accent);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #fff;
+  margin: 0 auto 1rem;
+}
+
+.login-header h2 {
+  font-weight: 800;
+  font-size: 1.6rem;
+  color: #0f172a;
+}
+
+.btn-login {
+  background: var(--accent);
+  border-color: var(--accent);
+  font-weight: 600;
+  padding: 0.65rem;
+  font-size: 1rem;
+}
+
+.btn-login:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+/* =========================================================
+   Balance Cards
+   ========================================================= */
+.balance-card {
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.balance-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.09);
+}
+
+.balance-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.balance-days {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.balance-unit {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: #64748b;
+}
+
+.balance-icon {
+  width: 44px;
+  height: 44px;
+  background: #f0f4ff;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.balance-progress {
+  height: 6px;
+  border-radius: 3px;
+  background: #e2e8f0;
+}
+
+/* =========================================================
+   Tables & Cards
+   ========================================================= */
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius);
+}
+
+.card-header {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.875rem 1.25rem;
+  font-weight: 600;
+}
+
+.table th {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+}
+
+.table td {
+  font-size: 0.875rem;
+  vertical-align: middle;
+}
+
+/* =========================================================
+   Status Badges
+   ========================================================= */
+.status-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 0.3em 0.7em;
+  border-radius: 20px;
+}
+
+/* =========================================================
+   Employee Avatar (manager view)
+   ========================================================= */
+.employee-avatar-sm {
+  width: 30px;
+  height: 30px;
+  background: #e0e7ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   Detail page dl
+   ========================================================= */
+.detail-list dt {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-top: 0.5rem;
+}
+
+.detail-list dd {
+  padding-top: 0.5rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* =========================================================
+   Page header
+   ========================================================= */
+.page-header {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 1.5rem;
+}
+
+/* =========================================================
+   Detail items (manager leave detail)
+   ========================================================= */
+.detail-item {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+
+.detail-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #94a3b8;
+  margin-bottom: 0.25rem;
+}
+
+.detail-value {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+/* Employee avatar large */
+.employee-avatar-lg {
+  width: 52px;
+  height: 52px;
+  background: #e0e7ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   Sidebar toggle (mobile)
+   ========================================================= */
+#sidebarToggle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  #sidebarToggle {
+    display: inline-flex;
+  }
+
+  #sidebar {
+    position: fixed;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+
+  #sidebar.open {
+    transform: translateX(0);
+  }
+
+  .content-area {
+    padding: 1rem;
+  }
+}
